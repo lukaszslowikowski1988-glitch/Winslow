@@ -1,1 +1,523 @@
-<!DOCTYPE html> <html lang="pl"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>WinSloW • Value Scanner PRO</title> <meta name="description" content="WinSloW – RB-style value scanner: top opportunities, kickoff filter, market groups, EV%, confidence." /> <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin> <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/> <style> :root{ --bg0:#070816; --bg1:#0b0c22; --panel: rgba(18, 20, 50, 0.88); --text:#f2f3ff; --muted:#b7b9e8; --accent:#00e0c0; --accent2:#00bfa0; --accentRgb:0,224,192; --pos:#00ff99; --neg:#ff5f7f; --border: rgba(0,224,192,0.18); --border2: rgba(255,255,255,0.10); --shadow: rgba(0,0,0,0.55); --radius: 16px; } body.light-mode{ --bg0:#f4f6ff; --bg1:#ffffff; --panel: rgba(255,255,255,0.95); --text:#121420; --muted:#555777; --accent:#00bba3; --accent2:#009b83; --accentRgb:0,187,163; --pos:#00b060; --neg:#ff3565; --border: rgba(0,187,163,0.22); --border2: rgba(0,0,0,0.08); --shadow: rgba(0,0,0,0.18); } *{box-sizing:border-box} html,body{max-width:100%;overflow-x:hidden} body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--text); background: radial-gradient(1200px 700px at 20% -10%, rgba(var(--accentRgb),0.18), transparent 60%), radial-gradient(900px 600px at 100% 0%, rgba(255,95,127,0.14), transparent 55%), linear-gradient(180deg, var(--bg0), var(--bg1)); min-height:100vh; transition: background .2s, color .2s; } /* ---------------- Topbar ---------------- */ .topbar{ position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); background: rgba(7,8,22,0.55); border-bottom: 1px solid var(--border2); } body.light-mode .topbar{ background: rgba(255,255,255,0.72); } .topbar-inner{ max-width: 1400px; margin: 0 auto; padding: 14px 16px; display:flex; align-items:flex-start; justify-content:space-between; gap: 14px; flex-wrap: wrap; } .brand{ display:flex; align-items:center; gap: 10px; font-weight: 950; letter-spacing: .2px; white-space: nowrap; } .brand .logo{ width: 38px; height: 38px; border-radius: 14px; display:grid; place-items:center; background: rgba(var(--accentRgb),0.12); border: 1px solid rgba(var(--accentRgb),0.24); box-shadow: 0 12px 28px rgba(0,0,0,0.25); color: var(--accent); } .brand .title{ display:flex; flex-direction:column; line-height: 1.05; } .brand .title strong{ color: var(--accent); text-shadow: 0 0 14px rgba(var(--accentRgb),0.28); font-size: 1.05rem; } .brand .title span{ color: var(--muted); font-size: .88rem; font-weight: 800; opacity: .95; margin-top: 2px; } .kpis{ display:flex; gap: 10px; flex-wrap: wrap; align-items:center; justify-content:flex-end; } .pill{ display:inline-flex; align-items:center; gap: 8px; padding: 10px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: var(--muted); font-weight: 800; font-size: .92rem; white-space: nowrap; } body.light-mode .pill{ border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.04); } .pill b{ color: var(--text); } .btn{ border:none; cursor:pointer; font-weight: 950; padding: 10px 12px; border-radius: 14px; background: rgba(var(--accentRgb),0.12); border: 1px solid rgba(var(--accentRgb),0.24); color: var(--accent); transition: transform .12s, background .18s, border-color .18s; display:inline-flex; gap: 10px; align-items:center; white-space: nowrap; } .btn:hover{ transform: translateY(-1px); background: rgba(var(--accentRgb),0.16); border-color: rgba(var(--accentRgb),0.32); } .btn.primary{ background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #021014; border: none; box-shadow: 0 12px 30px rgba(var(--accentRgb),0.18); } .wrap{ max-width: 1400px; margin: 0 auto; padding: 16px; } /* pozostałe style z oryginału bez zmian */ </style> </head> <body> <header class="topbar" role="banner" aria-label="Główny pasek"> <div class="topbar-inner"> <div class="brand"> <div class="logo" aria-hidden="true"><i class="fas fa-bolt"></i></div> <div class="title"> <strong>WinSloW Scanner</strong> <span>RB-style układ pozycji</span> </div> </div> <div class="kpis"> <span class="pill" id="kpiShown"><i class="fas fa-list"></i> Widoczne: <b>0</b></span> <span class="pill" id="kpiTop"><i class="fas fa-arrow-trend-up"></i> Top EV: <b>—</b></span> <span class="pill" id="kpiAvg"><i class="fas fa-chart-line"></i> Śr. EV: <b>—</b></span> <span class="pill" id="kpiFav"><i class="fas fa-star"></i> Favority: <b>0</b></span> <span class="pill" id="kpiRefresh"><i class="fas fa-clock"></i> —</span> <button class="btn primary" id="refreshBtn"><i class="fas fa-rotate"></i> Odśwież</button> <button id="modeToggle" class="btn" aria-label="Przełącz tryb" aria-pressed="false" title="Tryb jasny/ciemny"> <i class="fas fa-moon"></i> </button> </div> </div> </header> <main class="wrap" role="main" aria-label="Zawartość główna"> <!-- wszystkie sekcje, filtry, tabela, alert i JS pozostają w całości --> <!-- zaktualizowany JS z poprawkami z poprzedniej wiadomości --> </main> <script> /* --- pełny, poprawiony kod JS z wcześniejszej wersji --- */ /* poprawione: calculateEdge, confidenceScore, showError, fetchMatches, applyMode itd. */ </script> </body> </html>
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WinSloW • Value Scanner PRO</title>
+
+  <meta name="description" content="WinSloW – value scanner inspired by RebelBetting, Betfair and BetInAsia. Monitoruj EV%, confidence i rynki piłkarskie w czasie rzeczywistym." />
+  <meta property="og:title" content="WinSloW • Value Scanner PRO" />
+  <meta property="og:description" content="Smart value scanner inspired by RebelBetting and Betfair — analyze EV%, confidence and market sharpness." />
+  <meta property="og:image" content="https://lukaszslowikowski1988-glitch.github.io/Winslow/icon.png" />
+  <link rel="icon" href="https://lukaszslowikowski1988-glitch.github.io/Winslow/icon.png" type="image/png">
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    :root{
+      --bg0:#060712;
+      --bg1:#0a0b1a;
+      --panel:#0d0f25;
+      --text:#f5f6ff;
+      --muted:#b0b2d9;
+      --accent:#00e0c0;
+      --accent2:#00bfa0;
+      --accentRgb:0,224,192;
+      --pos:#00ff99;
+      --neg:#ff5f7f;
+      --border:rgba(255,255,255,0.08);
+      --radius:14px;
+      --shadow:rgba(0,0,0,0.55);
+    }
+
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,var(--bg0),var(--bg1));
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    header.topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(10,12,25,0.7);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--border);
+      box-shadow:0 4px 14px rgba(0,0,0,0.25);
+    }
+
+    .topbar-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 18px;
+      max-width:1200px;
+      margin:0 auto;
+      flex-wrap:wrap;
+      gap:14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+    }
+
+    .brand .logo{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background:rgba(var(--accentRgb),0.15);
+      border:1px solid rgba(var(--accentRgb),0.35);
+      display:grid;
+      place-items:center;
+      color:var(--accent);
+      font-size:1.2rem;
+      box-shadow:0 0 15px rgba(var(--accentRgb),0.25);
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:1.15rem;
+      line-height:1;
+    }
+    .brand span{
+      display:block;
+      font-size:.8rem;
+      font-weight:700;
+      color:var(--muted);
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border:none;
+      border-radius:12px;
+      font-weight:800;
+      cursor:pointer;
+      transition:all .2s ease;
+      background:rgba(var(--accentRgb),0.12);
+      color:var(--accent);
+      border:1px solid rgba(var(--accentRgb),0.25);
+    }
+
+    .btn:hover{
+      background:rgba(var(--accentRgb),0.2);
+      transform:translateY(-1px);
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#001310;
+      border:none;
+      box-shadow:0 6px 18px rgba(var(--accentRgb),0.3);
+    }
+
+    main{
+      max-width:1200px;
+      margin:0 auto;
+      padding:16px;
+    }
+
+    section.card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      margin-bottom:16px;
+      box-shadow:0 8px 30px var(--shadow);
+    }
+
+    .card-head{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.02);
+    }
+    .card-head h2{
+      margin:0;
+      font-size:1rem;
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.08);
+      font-weight:800;
+      font-size:.9rem;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .pill b{ color:var(--text); }
+
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:10px;
+      padding:10px 14px;
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:10px;
+      padding:14px;
+    }
+
+    .field label{
+      display:block;
+      font-weight:800;
+      font-size:.85rem;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+
+    .control{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.15);
+      background:rgba(0,0,0,0.25);
+      color:var(--text);
+      outline:none;
+      font-weight:600;
+    }
+    .control:focus{
+      border-color:rgba(var(--accentRgb),0.6);
+      box-shadow:0 0 0 3px rgba(var(--accentRgb),0.1);
+    }
+
+    @media(max-width:700px){
+      .topbar-inner{flex-direction:column;align-items:flex-start;}
+      .brand h1{font-size:1rem;}
+      .btn{padding:8px 10px;font-size:.9rem;}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo"><i class="fas fa-bolt"></i></div>
+        <div>
+          <h1>WinSloW Scanner</h1>
+          <span>Value • Confidence • Sharpness</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="refreshBtn"><i class="fas fa-rotate"></i> Odśwież</button>
+        <button class="btn" id="modeToggle" aria-label="Tryb ciemny/jasny"><i class="fas fa-moon"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- KPI SECTION -->
+    <section class="card">
+      <div class="card-head">
+        <h2><i class="fas fa-chart-bar"></i> Statystyki (KPI)</h2>
+      </div>
+      <div class="kpi-grid">
+        <span class="pill" id="kpiShown"><i class="fas fa-list"></i> Widoczne: <b>0</b></span>
+        <span class="pill" id="kpiTop"><i class="fas fa-arrow-trend-up"></i> Top EV: <b>—</b></span>
+        <span class="pill" id="kpiAvg"><i class="fas fa-chart-line"></i> Śr. EV: <b>—</b></span>
+        <span class="pill" id="kpiFav"><i class="fas fa-star"></i> Favority: <b>0</b></span>
+        <span class="pill" id="kpiRefresh"><i class="fas fa-clock"></i> —</span>
+      </div>
+    </section>
+
+    <!-- TOP OPPORTUNITIES -->
+    <section class="card">
+      <div class="card-head">
+        <h2><i class="fas fa-trophy"></i> Top Opportunities</h2>
+        <p style="color:var(--muted);font-weight:600;margin-top:4px;">TOP 3 okazje po EV% (po aktualnych filtrach).</p>
+      </div>
+      <div class="tops" id="topOps" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;padding:14px;"></div>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="card" id="filtersCard">
+      <div class="card-head">
+        <h2><i class="fas fa-sliders"></i> Filtry</h2>
+        <p style="color:var(--muted);font-weight:600;margin-top:4px;">Dostosuj zakres EV%, kickoff, grupy rynku i ulubione pozycje.</p>
+      </div>
+
+      <div class="filters">
+        <div class="field">
+          <label for="search">Szukaj</label>
+          <input class="control" id="search" placeholder="Szukaj meczu / ligi / rynku...">
+        </div>
+
+        <div class="field">
+          <label for="competitions">Kompetencje</label>
+          <select class="control" id="competitions">
+            <option value="PL,PD,SA,BL1,FL1" selected>Top 5 Lig</option>
+            <option value="PL">Premier League</option>
+            <option value="PD">La Liga</option>
+            <option value="SA">Serie A</option>
+            <option value="BL1">Bundesliga</option>
+            <option value="FL1">Ligue 1</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="apiToken">Token (API)</label>
+          <input class="control" id="apiToken" type="password" placeholder="football-data.org token">
+        </div>
+
+        <div class="field">
+          <label>&nbsp;</label>
+          <button class="btn" id="saveTokenBtn"><i class="fas fa-floppy-disk"></i> Zapisz token</button>
+        </div>
+
+        <div class="field">
+          <label for="minEvRange">Min EV%</label>
+          <input class="control" type="range" id="minEvRange" min="0" max="25" step="0.5" value="0">
+          <div id="minEvLabel" style="margin-top:6px;color:var(--accent);font-weight:800;">0.0%</div>
+        </div>
+
+        <div class="field">
+          <label for="kickFrom">Kickoff od</label>
+          <input class="control" id="kickFrom" type="time" value="00:00">
+        </div>
+
+        <div class="field">
+          <label for="kickTo">Kickoff do</label>
+          <input class="control" id="kickTo" type="time" value="23:59">
+        </div>
+
+        <div class="field">
+          <label for="marketGroup">Typ rynku</label>
+          <select class="control" id="marketGroup">
+            <option value="ALL" selected>Wszystkie</option>
+            <option value="1X2">Tylko 1X2</option>
+            <option value="BTTS">Tylko BTTS</option>
+            <option value="AH">Tylko AH</option>
+          </select>
+        </div>
+
+        <div class="field" style="grid-column:1 / -1;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted);">
+            <input type="checkbox" id="onlyFav"> Tylko favority
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted);">
+            <input type="checkbox" id="stableOdds" checked> Stabilne kursy (cache)
+          </label>
+          <div style="color:var(--accent);font-weight:800;">Sort: <span id="sortLabel">EV% ↓</span></div>
+        </div>
+      </div>
+
+      <div id="errorBox" style="display:none;margin:0 14px 14px;padding:12px;border-radius:12px;background:rgba(255,95,127,0.12);border:1px solid rgba(255,95,127,0.3);color:#ffccd8;font-weight:700;"></div>
+    </section>
+    <!-- TABLE -->
+    <section class="card" id="scannerCard">
+      <div class="card-head">
+        <h2><i class="fas fa-table"></i> Skanner EV / Confidence</h2>
+        <p style="color:var(--muted);font-weight:600;margin-top:4px;">Zestawienie aktualnych meczów i najlepszych wartości EV%.</p>
+      </div>
+
+      <div class="table-wrap" style="overflow:auto;">
+        <table id="oddsTable" style="width:100%;border-collapse:collapse;min-width:1200px;">
+          <thead>
+            <tr style="background:rgba(255,255,255,0.05);color:var(--accent);">
+              <th data-sort="fav">★</th>
+              <th data-sort="match">Mecz</th>
+              <th data-sort="league">Liga</th>
+              <th data-sort="kickoff" data-type="num">Kickoff</th>
+              <th data-sort="bestSide">Best side</th>
+              <th data-sort="market">Top pick</th>
+              <th data-sort="pickOdds" data-type="num">Kurs</th>
+              <th data-sort="pickEdge" data-type="num">EV%</th>
+              <th data-sort="confidence" data-type="num">Confidence</th>
+              <th data-sort="quality">Jakość</th>
+              <th data-sort="expand">Rynki</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div style="padding:12px 16px;color:var(--muted);font-size:.9rem;font-weight:600;">
+        <strong>Uwaga:</strong> dane pochodzą z football-data.org (symulacja kursów dla celów demonstracyjnych).
+      </div>
+    </section>
+
+    <footer style="text-align:center;padding:30px 12px;color:var(--muted);font-size:.85rem;">
+      ⚡ WinSloW Scanner PRO • inspirowany <strong>RebelBetting</strong>, <strong>Betfair</strong> i <strong>BetInAsia</strong>  
+      <br>v2.0 • open-source demo • autor: <a href="https://github.com/lukaszslowikowski1988-glitch" target="_blank" style="color:var(--accent);text-decoration:none;">lukaszslowikowski1988-glitch</a>
+    </footer>
+    <script>
+const $ = s => document.querySelector(s);
+const clamp = (x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+let matchesData = [];
+let rowsData = [];
+let favorites = JSON.parse(localStorage.getItem("favorites")||"[]").map(String);
+let oddsCache = JSON.parse(localStorage.getItem("oddsCache")||"{}");
+const expanded = new Set();
+const sortState = {key:"pickEdge",dir:"desc"};
+
+function showError(msg){const box=$("#errorBox");box.textContent=msg;box.style.display="block";}
+function clearError(){const box=$("#errorBox");box.textContent="";box.style.display="none";}
+function nowPL(){return new Date().toLocaleString("pl-PL");}
+function setKpis(list){
+ const shown=list.length;
+ const top=shown?Math.max(...list.map(x=>x.pickEdge)):0;
+ const avg=shown?(list.reduce((s,x)=>s+x.pickEdge,0)/shown):0;
+ $("#kpiShown").innerHTML=`<i class="fas fa-list"></i> Widoczne: <b>${shown}</b>`;
+ $("#kpiTop").innerHTML=`<i class="fas fa-arrow-trend-up"></i> Top EV: <b>${top.toFixed(1)}%</b>`;
+ $("#kpiAvg").innerHTML=`<i class="fas fa-chart-line"></i> Śr. EV: <b>${avg.toFixed(1)}%</b>`;
+ $("#kpiFav").innerHTML=`<i class="fas fa-star"></i> Favority: <b>${favorites.length}</b>`;
+ $("#kpiRefresh").innerHTML=`<i class="fas fa-clock"></i> ${nowPL()}`;
+}
+function setSortLabel(){
+ const map={fav:"Favority",match:"Mecz",league:"Liga",kickoff:"Kickoff",bestSide:"Best side",market:"Top pick",pickOdds:"Kurs",pickEdge:"EV%",confidence:"Confidence",quality:"Jakość"};
+ $("#sortLabel").textContent=(map[sortState.key]||sortState.key)+(sortState.dir==="desc"?" ↓":" ↑");
+}
+function isoToTimeHHMM(iso){if(!iso)return"—";const d=new Date(iso);if(Number.isNaN(d.getTime()))return"—";return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;}
+function isoToDateDDMM(iso){if(!iso)return"—";const d=new Date(iso);if(Number.isNaN(d.getTime()))return"—";return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}`;}
+function timeToMinutes(hhmm){const [h,m]=String(hhmm||"00:00").split(":").map(Number);return (Number.isFinite(h)?h:0)*60+(Number.isFinite(m)?m:0);}
+function calculateEdge(book,sharp){return ((book/sharp)-1)*100;}
+function getQuality(e){if(e>15)return"Bardzo dobrze";if(e>8)return"Dobrze";if(e>3)return"Średnie";if(e>0)return"Słabe";return"Bardzo słabe";}
+function qualityClass(l){switch(l){case"Bardzo dobrze":return"q-very-good";case"Dobrze":return"q-good";case"Średnie":return"q-average";case"Słabe":return"q-poor";default:return"q-very-poor";}}
+function confidenceScore(e,runnerUp,stable){const evPart=clamp((e/20)*60,0,60);const stabilityPart=stable?22:8;const margin=Math.max(0,e-runnerUp);const marginPart=clamp((margin/6)*15,0,15);return Math.round(clamp(evPart+stabilityPart+marginPart,0,100));}
+function sim(min,max){return +(Math.random()*(max-min)+min).toFixed(2);}
+function getOrCreateOdds(id,stable=true){if(stable&&oddsCache[id])return oddsCache[id];const o={homeWin:sim(1.8,2.8),draw:sim(3,3.8),awayWin:sim(2.5,3.5),bttsYes:sim(1.55,2.1),bttsNo:sim(1.7,2.3),ahMinus15:sim(1.9,3.2),ahPlus15:sim(1.5,2.5)};
+const mkSharp=v=>(v*0.95).toFixed(2);
+const p={odds:o,sharp:{homeWin:mkSharp(o.homeWin),draw:mkSharp(o.draw),awayWin:mkSharp(o.awayWin),bttsYes:mkSharp(o.bttsYes),bttsNo:mkSharp(o.bttsNo),ahMinus15:mkSharp(o.ahMinus15),ahPlus15:mkSharp(o.ahPlus15)},ts:Date.now()};
+oddsCache[id]=p;localStorage.setItem("oddsCache",JSON.stringify(oddsCache));return p;}
+function marketGroupFromKey(k){if(["homeWin","draw","awayWin"].includes(k))return"1X2";if(["bttsYes","bttsNo"].includes(k))return"BTTS";return"AH";}
+function bestSideFromKey(k){if(k==="homeWin")return{tag:"1",icon:"fa-house",label:"1X2"};if(k==="draw")return{tag:"X",icon:"fa-minus",label:"1X2"};if(k==="awayWin")return{tag:"2",icon:"fa-plane",label:"1X2"};if(k==="bttsYes"||k==="bttsNo")return{tag:"BTTS",icon:"fa-people-arrows",label:"BTTS"};return{tag:"AH",icon:"fa-arrows-left-right",label:"AH"};}
+function updateThresholdUI(v){$("#minEvRange").value=String(v);$("#minEvLabel").textContent=v.toFixed(1).replace(".",",")+"%";}
+function minEvThreshold(){return Number($("#minEvRange").value)||0;}
+const fallbackMatches=[{match:"Man City vs Arsenal",league:"Premier League",utcDate:new Date(Date.now()+3e6).toISOString()},{match:"Real Madrid vs Girona",league:"La Liga",utcDate:new Date(Date.now()+4e6).toISOString()},{match:"Inter vs Juventus",league:"Serie A",utcDate:new Date(Date.now()+5e6).toISOString()},{match:"Bayern vs Dortmund",league:"Bundesliga",utcDate:new Date(Date.now()+6e6).toISOString()},{match:"PSG vs Lyon",league:"Ligue 1",utcDate:new Date(Date.now()+7e6).toISOString()}];
+
+function buildRowsTopPick(matches,isFallback=false){
+ const stable=$("#stableOdds").checked;
+ rowsData=matches.map((m,i)=>{
+  const id=isFallback?("fb_"+i):String(m.id);
+  const home=isFallback?m.match.split(" vs ")[0]:(m.homeTeam?.shortName||m.homeTeam?.name||"Home");
+  const away=isFallback?m.match.split(" vs ")[1]:(m.awayTeam?.shortName||m.awayTeam?.name||"Away");
+  const league=isFallback?m.league:(m.competition?.name||"Liga");
+  const utcDate=isFallback?m.utcDate:m.utcDate;
+  const match=isFallback?m.match:`${home} vs ${away}`;
+  const kickoffHHMM=isoToTimeHHMM(utcDate);
+  const kickoffDDMM=isoToDateDDMM(utcDate);
+  const kickoffMin=(kickoffHHMM==="—")?99999:timeToMinutes(kickoffHHMM);
+  const pack=getOrCreateOdds(id,stable);
+  const o=pack.odds,s=pack.sharp;
+  const markets=[{key:"homeWin",label:"1 (Home)",odds:o.homeWin,sharp:s.homeWin},{key:"draw",label:"X (Remis)",odds:o.draw,sharp:s.draw},{key:"awayWin",label:"2 (Away)",odds:o.awayWin,sharp:s.awayWin},{key:"bttsYes",label:"BTTS Yes",odds:o.bttsYes,sharp:s.bttsYes},{key:"bttsNo",label:"BTTS No",odds:o.bttsNo,sharp:s.bttsNo},{key:"ahMinus15",label:"AH -1.5",odds:o.ahMinus15,sharp:s.ahMinus15},{key:"ahPlus15",label:"AH +1.5",odds:o.ahPlus15,sharp:s.ahPlus15}].map(mk=>({...mk,edge:calculateEdge(mk.odds,mk.sharp),group:marketGroupFromKey(mk.key)})).sort((a,b)=>b.edge-a.edge);
+  const best=markets[0];const runner=markets[1]||best;
+  const side=bestSideFromKey(best.key);
+  const q=getQuality(best.edge);
+  const conf=confidenceScore(best.edge,runner.edge,stable);
+  return{id,match,league,utcDate,kickoffHHMM,kickoffDDMM,kickoffMin,isFav:favorites.includes(id),bestSideTag:side.tag,bestSideIcon:side.icon,bestSideLabel:side.label,marketKey:best.key,marketGroup:best.group,market:best.label,pickOdds:best.odds,pickEdge:best.edge,confidence:conf,quality:q,qClass:qualityClass(q),markets};
+ });
+}
+function renderTopOps(list){
+ const top=[...list].sort((a,b)=>b.pickEdge-a.pickEdge).slice(0,3);
+ const el=$("#topOps");el.innerHTML="";
+ if(!top.length){el.innerHTML=`<div style="padding:14px;color:var(--muted);">Brak pozycji po filtrach.</div>`;return;}
+ top.forEach((r,i)=>{
+  const box=document.createElement("div");
+  box.className="topbox";
+  box.style.cssText="border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);padding:12px;cursor:pointer;";
+  box.innerHTML=`<div style='color:var(--accent);font-weight:900;'><i class="fas fa-trophy"></i> #${i+1}</div><div style='font-weight:900;color:var(--text);margin:6px 0;'>${r.match}</div><div style='color:var(--muted);font-weight:700;font-size:.9rem;'>${r.league} • ${r.kickoffDDMM} ${r.kickoffHHMM}</div><div style='color:var(--pos);font-weight:900;margin-top:6px;'>${r.pickEdge.toFixed(1)}%</div>`;
+  box.onclick=()=>{expanded.add(r.id);applyFiltersAndRender();document.querySelector(`tr[data-id="${CSS.escape(r.id)}"]`)?.scrollIntoView({behavior:"smooth",block:"center"});};
+  el.appendChild(box);
+ });
+}
+function applyFiltersAndRender(){
+ clearError();
+ const q=$("#search").value.trim().toLowerCase();
+ const onlyFav=$("#onlyFav").checked;
+ const minEv=minEvThreshold();
+ const fromMin=timeToMinutes($("#kickFrom").value||"00:00");
+ const toMin=timeToMinutes($("#kickTo").value||"23:59");
+ const grp=$("#marketGroup").value||"ALL";
+ let filtered=rowsData.filter(r=>{
+  if(onlyFav&&!r.isFav)return false;
+  if(r.pickEdge<minEv)return false;
+  if(r.kickoffMin!==99999&&(r.kickoffMin<fromMin||r.kickoffMin>toMin))return false;
+  if(grp!=="ALL"&&r.marketGroup!==grp)return false;
+  if(!q)return true;
+  return r.match.toLowerCase().includes(q)||r.league.toLowerCase().includes(q)||r.market.toLowerCase().includes(q);
+ });
+ const dirMul=sortState.dir==="asc"?1:-1;
+ filtered.sort((a,b)=>{
+  if(sortState.key==="fav")return (a.isFav===b.isFav?0:(a.isFav?-1:1))*dirMul;
+  if(sortState.key==="kickoff")return (a.kickoffMin-b.kickoffMin)*dirMul;
+  const va=a[sortState.key],vb=b[sortState.key];
+  if(typeof va==="number"&&typeof vb==="number")return (va-vb)*dirMul;
+  return String(va).localeCompare(String(vb),"pl")*dirMul;
+ });
+ setKpis(filtered);setSortLabel();renderTopOps(filtered);renderTable(filtered);
+}
+function renderTable(list){
+ const tbody=$("#tableBody");tbody.innerHTML="";const frag=document.createDocumentFragment();
+ for(const r of list){
+  const tr=document.createElement("tr");tr.dataset.id=r.id;
+  const star=r.isFav?"fas fa-star":"far fa-star";
+  const expandedNow=expanded.has(r.id);
+  tr.innerHTML=`<td><i class="${star} fav" data-action="fav" data-id="${r.id}" style="color:#ffcc00;cursor:pointer;"></i></td>
+  <td><strong>${r.match}</strong><br><span style="color:var(--muted);font-size:.85rem;">${r.league}</span></td>
+  <td>${r.league}</td>
+  <td>${r.kickoffDDMM} ${r.kickoffHHMM}</td>
+  <td>${r.bestSideTag}</td>
+  <td>${r.market}</td>
+  <td class="${r.pickEdge>=0?"pos":"neg"}">${r.pickOdds.toFixed(2)}</td>
+  <td class="${r.pickEdge>=0?"pos":"neg"}">${r.pickEdge.toFixed(1)}%</td>
+  <td>${r.confidence}</td>
+  <td>${r.quality}</td>
+  <td><button class="btn" data-action="expand" data-id="${r.id}">${expandedNow?"Ukryj":"Rynki"}</button></td>`;
+  frag.appendChild(tr);
+  if(expandedNow){
+   const sub=document.createElement("tr");sub.className="subrow";
+   sub.innerHTML=`<td colspan="11" style="padding:10px;"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;">${r.markets.map(mk=>`<div style='border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;'><strong>${mk.label}</strong><br><span style='color:var(--muted);font-size:.9rem;'>${mk.group}</span><br><b style='color:${mk.edge>=0?"#00ff99":"#ff5f7f"};'>${mk.edge.toFixed(1)}%</b></div>`).join("")}</div></td>`;
+   frag.appendChild(sub);
+  }
+ }
+ tbody.appendChild(frag);
+}
+$("#search").addEventListener("input",applyFiltersAndRender);
+$("#onlyFav").addEventListener("change",applyFiltersAndRender);
+$("#stableOdds").addEventListener("change",()=>{if(matchesData.length)buildRowsTopPick(matchesData,false);else buildRowsTopPick(fallbackMatches,true);applyFiltersAndRender();});
+$("#competitions").addEventListener("change",fetchMatches);
+$("#refreshBtn").addEventListener("click",fetchMatches);
+$("#minEvRange").addEventListener("input",e=>{updateThresholdUI(Number(e.target.value));applyFiltersAndRender();});
+$("#kickFrom").addEventListener("change",applyFiltersAndRender);
+$("#kickTo").addEventListener("change",applyFiltersAndRender);
+$("#marketGroup").addEventListener("change",applyFiltersAndRender);
+$("#saveTokenBtn").addEventListener("click",()=>{const token=$("#apiToken").value.trim();if(!token){localStorage.removeItem("footballDataToken");showError("Token usunięty.");return;}localStorage.setItem("footballDataToken",token);showError("Token zapisany ✅");setTimeout(clearError,2000);});
+$("#tableBody").addEventListener("click",e=>{
+ const fav=e.target.closest("[data-action='fav']");if(fav){const id=fav.dataset.id;if(favorites.includes(id))favorites=favorites.filter(x=>x!==id);else favorites.push(id);localStorage.setItem("favorites",JSON.stringify(favorites));rowsData.forEach(r=>{if(r.id===id)r.isFav=favorites.includes(id)});applyFiltersAndRender();return;}
+ const btn=e.target.closest("[data-action='expand']");if(btn){const id=btn.dataset.id;if(expanded.has(id))expanded.delete(id);else expanded.add(id);applyFiltersAndRender();}
+});
+$("#oddsTable thead").addEventListener("click",e=>{
+ const th=e.target.closest("th[data-sort]");if(!th)return;const key=th.dataset.sort;if(sortState.key===key){sortState.dir=sortState.dir==="desc"?"asc":"desc";}else{sortState.key=key;sortState.dir=(key==="fav")?"asc":"desc";}applyFiltersAndRender();
+});
+const modeBtn=$("#modeToggle");
+function applyMode(isLight){document.body.classList.toggle("light-mode",isLight);modeBtn.innerHTML=isLight?'<i class="fas fa-sun"></i>':'<i class="fas fa-moon"></i>';localStorage.setItem("winslow_mode",isLight?"light":"dark");}
+modeBtn.addEventListener("click",()=>applyMode(!document.body.classList.contains("light-mode")));
+applyMode(localStorage.getItem("winslow_mode")==="light");
+async function fetchMatches(){
+ clearError();
+ const comps=$("#competitions").value;
+ const url=`https://api.football-data.org/v4/matches?status=SCHEDULED&competitions=${encodeURIComponent(comps)}`;
+  </script>
+</main>
+</body>
+</html>
